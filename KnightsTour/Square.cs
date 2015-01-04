@@ -6,12 +6,15 @@ using System.Threading.Tasks;
 
 namespace KnightsTour
 {
-    class Program
+    class Square
     {
-        static void Main(string[] args)
+        public bool Visited { get; set; }
+        public int Step { get; set; }
+
+        public Square()
         {
-            KnightsTourGame game = new KnightsTourGame(8);
-            game.test();
+            Visited = false;
+            Step = 0;
         }
     }
 }
