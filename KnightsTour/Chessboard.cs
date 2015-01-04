@@ -26,7 +26,12 @@ namespace KnightsTour
             for (int m = Size - 1; m >= 0; m--)
             {
                 for (int n = 0; n < Size; n++)
-                    Console.Write("{0:000} ", Board[n, m].Step);
+                {
+                    if(Size < 10)
+                        Console.Write("{0:00} ", Board[n, m].Step);
+                    else
+                        Console.Write("{0:000} ", Board[n, m].Step);
+                }
                 Console.WriteLine();
             }
         }

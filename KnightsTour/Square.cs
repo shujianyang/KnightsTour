@@ -14,7 +14,7 @@ namespace KnightsTour
         public Square()
         {
             Visited = false;
-            Step = 0;
+            Step = -1;
         }
     }
 }

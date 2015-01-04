@@ -17,6 +17,8 @@ namespace KnightsTour
     {
 
         private Chessboard cb;
+        private int step;
+
         private List<Direction> allDirections = new List<Direction>
         { Direction.UpRight, Direction.RightUp, Direction.RightDown, Direction.DownRight,
             Direction.DownLeft, Direction.LeftDown, Direction.LeftUp, Direction.UpLeft };
@@ -24,6 +26,7 @@ namespace KnightsTour
         public KnightsTourGame(int size)
         {
             cb = new Chessboard(size);
+            step = 1;
         }
 
         private void move(int x, int y, Direction dir, out int endX, out int endY)
@@ -80,15 +83,6 @@ namespace KnightsTour
             return onBoard;
         }
 
-        private Square squreTowards(int x, int y, Direction dir)
-        {
-            int endX, endY;
-
-            move(x, y, dir, out endX, out endY);
-
-            return cb.Board[endX, endY];
-        }
-
         private int possibleMoves(int x, int y)
         {
             int count = 0;
@@ -98,15 +92,66 @@ namespace KnightsTour
             return count;
         }
 
-        public void test()
+        private class directionCountComparer: IComparer<int>
         {
-            cb.Board[1, 6].Visited = true;
+            public int Compare(int x, int y)
+            {
+                if (x <= y)
+                    return -1;
+                else
+                    return 1;
+            }
+        }
 
-            for (int m = 0; m < cb.Size; m++)
-                for (int n = 0; n < cb.Size; n++)
-                    cb.Board[m, n].Step = possibleMoves(m, n);
+        SortedList<int, Direction> setPriority(int x, int y)
+        {
+            SortedList<int, Direction> directionPriority = new SortedList<int, Direction>(new directionCountComparer());
+            foreach (Direction dir in allDirections)
+            {
+                if(canMoveTowards(x, y, dir))
+                {
+                    int endX, endY;
+                    move(x, y, dir, out endX, out endY);
+                    int count = possibleMoves(endX, endY);
+                    directionPriority.Add(count, dir);
+                }
+            }
+            return directionPriority;
+        }
 
-            cb.printChessBoard();
+        public bool recursiveMoveFrom(int x, int y)
+        {
+            cb.Board[x, y].Step = step++;
+            cb.Board[x, y].Visited = true;
+            if (step > cb.Size * cb.Size)
+                return true;
+
+            if (possibleMoves(x, y) == 0)
+                return false;
+
+            SortedList<int, Direction> directionPriority = setPriority(x, y);
+            foreach(var dir in directionPriority.Values)
+            {
+                int endX, endY;
+                move(x, y, dir, out endX, out endY);
+                if (recursiveMoveFrom(endX, endY))
+                    return true;
+                else
+                {
+                    cb.Board[endX, endY].Step = -1;
+                    cb.Board[endX, endY].Visited = false;
+                    step--;
+                }
+            }
+            return false;
+        }
+
+        public void startGameFrom(int x, int y)
+        {
+            if (recursiveMoveFrom(x - 1, y - 1))
+                cb.printChessBoard();
+            else
+                Console.WriteLine("No solution is found.");
         }
     }
 }
